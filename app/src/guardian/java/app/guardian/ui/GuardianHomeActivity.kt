@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.livedata.observeAsState
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.guardian.engine.GuardianEngine
 import app.guardian.engine.GuardianEngine.Protection
+import app.guardian.engine.GuardianSetup
 
 /** Spike placeholder for the senior home screen: one big status and one button. */
 class GuardianHomeActivity : ComponentActivity() {
@@ -41,6 +43,11 @@ private fun HomeScreen() {
     val protection = remember(tick) { GuardianEngine.protection() }
     val consent = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (GuardianEngine.consentIntent(context) == null) GuardianEngine.start(context)
+    }
+
+    // apply the senior preset once protection is on (idempotent)
+    LaunchedEffect(protection) {
+        if (protection == Protection.ON) GuardianSetup.apply(context.applicationContext)
     }
 
     Column(

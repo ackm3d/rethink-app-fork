@@ -54,13 +54,19 @@ object GuardianEngine : KoinComponent {
      */
     suspend fun useLists(lists: Collection<ThreatList>): Boolean {
         val values = lists.map { it.engineValue }.toSet()
+        if (values.isEmpty()) {
+            persistentState.blocklistEnabled = false
+            persistentState.localBlocklistStamp = ""
+            persistentState.numberOfLocalBlocklists = 0
+            return true
+        }
         val stamp = RethinkBlocklistManager.getStamp(
             values, RethinkBlocklistManager.RethinkBlocklistType.LOCAL
         )
-        if (values.isNotEmpty() && stamp.isBlank()) return false
+        if (stamp.isBlank()) return false
+        persistentState.blocklistEnabled = true
         persistentState.localBlocklistStamp = stamp
         persistentState.numberOfLocalBlocklists = values.size
-        persistentState.blocklistEnabled = values.isNotEmpty()
         return true
     }
 

@@ -3264,7 +3264,7 @@ class BraveVPNService : VpnService(), ConnectionMonitor.NetworkListener, Network
                 )
 
             // val mtu = mtu() // get mtu from the underlyingnetworks
-            var builder: Builder = newBuilder().setSession("Rethink").setMtu(mtu)
+            var builder: Builder = newBuilder().setSession(getString(R.string.app_name)).setMtu(mtu)
 
             // set the PendingIntent to an activity for users to configure the vpn connection.
             // if it is not set, the button to configure will not be shown in system-managed dialogs
