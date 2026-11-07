@@ -364,6 +364,16 @@ android {
             buildConfigField("int", "BASE_VERSION_CODE", appVersionCode.toString())
             vectorDrawables.useSupportLibrary = true
         }
+        // guardian: senior-first safety app on the same engine. Own app id and UI
+        // (app/src/guardian); everything else comes from main. See app/src/guardian/README.md
+        create("guardian") {
+            dimension = "releaseType"
+            applicationId = "app.guardianvpn" // placeholder until the brand domain is final
+            versionCode = appVersionCode
+            versionName = gitVersion
+            buildConfigField("int", "BASE_VERSION_CODE", appVersionCode.toString())
+            vectorDrawables.useSupportLibrary = true
+        }
     }
     sourceSets {
         getByName("main").res.directories.add("src/full/res")
@@ -666,4 +676,14 @@ dependencies {
     "playImplementation"(platform(libs.googleFirebaseFirebaseBom))
     "playImplementation"(libs.googleFirebaseFirebaseCrashlytics)
     "playImplementation"(libs.googleFirebaseFirebaseCrashlyticsNdk)
+}
+
+// guardian: reuse the tv flavour's dependency set (Compose + libs that main's code needs),
+// plus the shared multiplatform module. Kept here so upstream edits above merge cleanly.
+configurations.matching { it.name == "guardianImplementation" }.configureEach {
+    extendsFrom(configurations.getByName("tvImplementation"))
+}
+dependencies {
+    "kspGuardian"(libs.githubBumptechGlideCompilerTv)
+    "guardianImplementation"(project(":shared"))
 }

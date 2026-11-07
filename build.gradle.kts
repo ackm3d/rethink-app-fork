@@ -32,6 +32,8 @@ plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.androidTest) apply false
     alias(libs.plugins.kotlinCompose) apply false
+    // guardian: Kotlin Multiplatform for the shared :shared module
+    alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.ksp) apply false
 }
 

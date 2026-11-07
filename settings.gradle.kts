@@ -15,6 +15,8 @@ pluginManagement {
 rootProject.name = "rethink"
 include(":app")
 include(":benchmark")
+// guardian: platform-neutral code shared with future iOS/desktop apps
+include(":shared")
 
 dependencyResolutionManagement {
     versionCatalogs {

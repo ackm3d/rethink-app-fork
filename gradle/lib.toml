@@ -162,4 +162,6 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidTest = { id = "com.android.test", version.ref = "agp" }
 # Required by the TV flavor's Compose UI.
 kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# guardian: shared Kotlin Multiplatform module (Android now, iOS/desktop later)
+kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
