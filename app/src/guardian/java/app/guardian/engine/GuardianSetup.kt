@@ -9,7 +9,9 @@ import com.celzero.bravedns.download.AppDownloadManager
 import com.celzero.bravedns.service.PersistentState
 import com.celzero.bravedns.util.Logger
 import com.celzero.bravedns.util.Utilities
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -30,9 +32,10 @@ object GuardianSetup : KoinComponent {
     /** Spike-only: live phishing domains missing from the bundled lists, to prove our own feed works. */
     private val testScamDomains = listOf("allmart-ai.com")
 
-    suspend fun apply(context: Context, persona: Persona = Persona.SENIOR) {
+    /** Runs on a background thread: the engine's settings live in a database Room won't touch on the main thread. */
+    suspend fun apply(context: Context, persona: Persona = Persona.SENIOR) = withContext(Dispatchers.IO) {
         useQuad9()
-        if (!ensureListsDownloaded(context)) return
+        if (!ensureListsDownloaded(context)) return@withContext
         enableLists(persona)
         if (BuildConfig.DEBUG) testScamDomains.forEach { GuardianEngine.blockDomain(it) }
     }

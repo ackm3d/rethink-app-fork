@@ -12,6 +12,8 @@ import com.celzero.bravedns.service.PersistentState
 import com.celzero.bravedns.service.RethinkBlocklistManager
 import com.celzero.bravedns.service.VpnController
 import com.celzero.bravedns.util.Constants.Companion.UID_EVERYBODY
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -52,35 +54,38 @@ object GuardianEngine : KoinComponent {
      * Needs the list files downloaded first, and the VPN running (the encoder lives in the engine).
      * Returns false if the engine could not encode the selection.
      */
-    suspend fun useLists(lists: Collection<ThreatList>): Boolean {
+    suspend fun useLists(lists: Collection<ThreatList>): Boolean = withContext(Dispatchers.IO) {
         val values = lists.map { it.engineValue }.toSet()
         if (values.isEmpty()) {
             persistentState.blocklistEnabled = false
             persistentState.localBlocklistStamp = ""
             persistentState.numberOfLocalBlocklists = 0
-            return true
+            return@withContext true
         }
         val stamp = RethinkBlocklistManager.getStamp(
             values, RethinkBlocklistManager.RethinkBlocklistType.LOCAL
         )
-        if (stamp.isBlank()) return false
+        if (stamp.isBlank()) return@withContext false
         persistentState.blocklistEnabled = true
         persistentState.localBlocklistStamp = stamp
         persistentState.numberOfLocalBlocklists = values.size
-        return true
+        true
     }
 
     /** Blocks a domain in every app, e.g. a scam domain pushed by our own feed or the helper. */
-    suspend fun blockDomain(domain: String, includeSubdomains: Boolean = true) =
+    suspend fun blockDomain(domain: String, includeSubdomains: Boolean = true) = withContext(Dispatchers.IO) {
         DomainRulesManager.addDomainRule(domain, DomainRulesManager.Status.BLOCK, domainType(includeSubdomains), UID_EVERYBODY)
+    }
 
     /** Unblocks a domain in every app, e.g. after the helper approves an unblock request. */
-    suspend fun trustDomain(domain: String, includeSubdomains: Boolean = false) =
+    suspend fun trustDomain(domain: String, includeSubdomains: Boolean = false) = withContext(Dispatchers.IO) {
         DomainRulesManager.addDomainRule(domain, DomainRulesManager.Status.TRUST, domainType(includeSubdomains), UID_EVERYBODY)
+    }
 
     /** Lets one app through the firewall for a while, e.g. a helper-approved request. */
-    suspend fun allowAppFor(uid: Int, minutes: Int) =
+    suspend fun allowAppFor(uid: Int, minutes: Int) = withContext(Dispatchers.IO) {
         FirewallManager.updateTempAllowStatus(uid, minutes)
+    }
 
     private fun domainType(includeSubdomains: Boolean) =
         if (includeSubdomains) DomainRulesManager.DomainType.WILDCARD else DomainRulesManager.DomainType.DOMAIN
